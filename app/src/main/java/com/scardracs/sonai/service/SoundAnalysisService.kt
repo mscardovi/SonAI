@@ -53,6 +53,39 @@ class SoundAnalysisService : LifecycleService() {
         private val IGNORED_LABELS = setOf(
             "White noise", "Pink noise", "Static", "Hiss", "Hum", "Noise"
         )
+
+        internal fun getNoiseTypeForLabel(label: String): NoiseGenerator.NoiseType? {
+            val l = label.lowercase()
+            return when {
+                // High frequency / Voice / Melodic -> Stellar Wind (Pinkish/Whistle)
+                l.contains("speech") || l.contains("voice") || l.contains("conversation") ||
+                        l.contains("shouting") || l.contains("laughter") || l.contains("music") ||
+                        l.contains("singing") || l.contains("bird") || l.contains("whistle") -> NoiseGenerator.NoiseType.STELLAR_WIND
+
+                // Low frequency / Mechanical / Deep -> Earth Rumble (Brown/Rumble)
+                l.contains("tool") || l.contains("hammer") || l.contains("drill") ||
+                        l.contains("engine") || l.contains("vacuum") || l.contains("fan") ||
+                        l.contains("air conditioning") || l.contains("heavy") || l.contains("truck") ||
+                        l.contains("explosion") || l.contains("thunder") -> NoiseGenerator.NoiseType.EARTH_RUMBLE
+
+                // Rain / Splashing / Forest -> Rain Forest
+                l.contains("rain") || l.contains("liquid") || l.contains("drip") ||
+                        l.contains("stream") || l.contains("river") || l.contains("forest") ||
+                        l.contains("cricket") || l.contains("insect") || l.contains("spray") -> NoiseGenerator.NoiseType.RAIN_FOREST
+
+                // Waves / Large water / Coastal -> Ocean Waves
+                l.contains("ocean") || l.contains("sea") || l.contains("wave") ||
+                        l.contains("beach") || l.contains("surf") -> NoiseGenerator.NoiseType.OCEAN_WAVES
+
+                // Urban / Background / Static -> Deep Space (White/Hum)
+                l.contains("traffic") || l.contains("car") || l.contains("wind") ||
+                        l.contains("typing") || l.contains("keyboard") || l.contains("office") ||
+                        l.contains("clink") || l.contains("cup") || l.contains("waterfall") ||
+                        l.contains("water") || l.contains("whoosh") || l.contains("steam") -> NoiseGenerator.NoiseType.DEEP_SPACE
+
+                else -> null
+            }
+        }
     }
 
     override fun onCreate() {
@@ -114,7 +147,7 @@ class SoundAnalysisService : LifecycleService() {
             } else {
                 isAutoMode = false
                 manualModes = modes.mapNotNull { 
-                    try { NoiseGenerator.NoiseType.valueOf(it) } catch (e: Exception) { null }
+                    try { NoiseGenerator.NoiseType.valueOf(it) } catch (_: Exception) { null }
                 }.toSet()
                 noiseGenerator.setModes(manualModes)
             }
@@ -220,7 +253,7 @@ class SoundAnalysisService : LifecycleService() {
         audioRecord = record
         try {
             record.startRecording()
-        } catch (e: IllegalStateException) {
+        } catch (_: IllegalStateException) {
             isAnalysisRunning = false
             return
         }
@@ -330,39 +363,6 @@ class SoundAnalysisService : LifecycleService() {
             putExtra("is_auto", isAuto)
         }
         sendBroadcast(intent)
-    }
-
-    private fun getNoiseTypeForLabel(label: String): NoiseGenerator.NoiseType? {
-        val l = label.lowercase()
-        return when {
-            // High frequency / Voice / Melodic -> Stellar Wind (Pinkish/Whistle)
-            l.contains("speech") || l.contains("voice") || l.contains("conversation") || 
-            l.contains("shouting") || l.contains("laughter") || l.contains("music") || 
-            l.contains("singing") || l.contains("bird") || l.contains("whistle") -> NoiseGenerator.NoiseType.STELLAR_WIND
-            
-            // Low frequency / Mechanical / Deep -> Earth Rumble (Brown/Rumble)
-            l.contains("tool") || l.contains("hammer") || l.contains("drill") || 
-            l.contains("engine") || l.contains("vacuum") || l.contains("fan") || 
-            l.contains("ac") || l.contains("heavy") || l.contains("truck") || 
-            l.contains("explosion") || l.contains("thunder") -> NoiseGenerator.NoiseType.EARTH_RUMBLE
-            
-            // Rain / Splashing / Forest -> Rain Forest
-            l.contains("rain") || l.contains("liquid") || l.contains("drip") || 
-            l.contains("stream") || l.contains("river") || l.contains("forest") ||
-            l.contains("cricket") || l.contains("insect") -> NoiseGenerator.NoiseType.RAIN_FOREST
-            
-            // Waves / Large water / Coastal -> Ocean Waves
-            l.contains("ocean") || l.contains("sea") || l.contains("wave") || 
-            l.contains("beach") || l.contains("surf") -> NoiseGenerator.NoiseType.OCEAN_WAVES
-
-            // Urban / Background / Static -> Deep Space (White/Hum)
-            l.contains("traffic") || l.contains("car") || l.contains("wind") || 
-            l.contains("typing") || l.contains("keyboard") || l.contains("office") ||
-            l.contains("clink") || l.contains("cup") || l.contains("waterfall") ||
-            l.contains("water") || l.contains("whoosh") -> NoiseGenerator.NoiseType.DEEP_SPACE
-
-            else -> null
-        }
     }
 
     private fun createNotificationChannel() {

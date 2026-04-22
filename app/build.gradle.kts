@@ -54,7 +54,6 @@ android {
     }
     buildFeatures {
         compose = true
-        viewBinding = true // Keep it temporarily for migration or if some legacy views remain
     }
     androidResources {
         noCompress += "tflite"
@@ -62,6 +61,12 @@ android {
     packaging {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
+        }
+    }
+    testOptions {
+        unitTests.isReturnDefaultValues = true
+        unitTests.all {
+            it.useJUnitPlatform()
         }
     }
 }
@@ -89,7 +94,11 @@ dependencies {
     
     debugImplementation(libs.androidx.ui.tooling)
 
-    testImplementation(libs.junit)
+    // Junit test suite
+    testImplementation(libs.junit.jupiter.api)
+    testImplementation(libs.junit.jupiter.params)
+    testRuntimeOnly(libs.junit.jupiter.engine)
+    testRuntimeOnly(libs.junit.platform.launcher)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(platform(libs.androidx.compose.bom))
