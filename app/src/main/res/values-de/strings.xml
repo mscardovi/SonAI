@@ -1,0 +1,27 @@
+<resources>
+    <string name="app_name">SonAI</string>
+    <string name="status_detected">Erkannt: %1$s</string>
+    <string name="masking_type">Maskierung: %1$s</string>
+    <string name="monitoring_active">Überwachung aktiv…</string>
+    <string name="btn_stop">Überwachung stoppen</string>
+    <string name="status_idle">Sound-Analyse: Leerlauf</string>
+    <string name="btn_start">Überwachung starten</string>
+    <string name="suggestion_default">Vorschlag: —</string>
+    <string name="permissions_required">Berechtigungen für die Sound-Analyse erforderlich</string>
+    <string name="initializing">Analysator wird initialisiert…</string>
+    <string name="error_msg">Fehler: %1$s</string>
+    <string name="manual_masking">Manuelle Maskierung: %1$s</string>
+    <string name="ambient_masking">Umgebungsmaskierung: %1$s</string>
+    <string name="notification_title">SonAI Fokus-Zone</string>
+    <string name="noise_level">Geräuschpegel: %1$d dB</string>
+    <string name="noise_level_default">Geräuschpegel: — dB</string>
+    <string name="masking_modes_hint">Maskierungsmodi</string>
+    <string name="select_modes_title">Modi auswählen</string>
+    <string name="ok">OK</string>
+    <string name="mode_white">Tiefer Weltraum</string>
+    <string name="mode_pink">Sternenwind</string>
+    <string name="mode_brown">Erdgrollen</string>
+    <string name="mode_rain">Regenwald</string>
+    <string name="mode_ocean">Meereswellen</string>
+    <string name="mode_auto">Auto</string>
+</resources>

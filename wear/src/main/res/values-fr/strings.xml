@@ -1,0 +1,13 @@
+<resources>
+    <string name="app_name">SonAI</string>
+    <string name="wear_start_monitoring">Démarrer Focus</string>
+    <string name="wear_stop_monitoring">Arrêter Focus</string>
+    <string name="wear_status_idle">Inactif</string>
+    <string name="wear_status_active">Focus Actif</string>
+    <string name="mode_white">Espace Profond</string>
+    <string name="mode_pink">Vent Stellaire</string>
+    <string name="mode_brown">Gronderie Terrestre</string>
+    <string name="mode_rain">Forêt Tropicale</string>
+    <string name="mode_ocean">Vagues de l\'Océan</string>
+    <string name="mode_auto">Auto</string>
+</resources>

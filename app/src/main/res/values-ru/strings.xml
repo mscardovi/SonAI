@@ -1,0 +1,27 @@
+<resources>
+    <string name="app_name">SonAI</string>
+    <string name="status_detected">Обнаружено: %1$s</string>
+    <string name="masking_type">Маскировка: %1$s</string>
+    <string name="monitoring_active">Мониторинг активен…</string>
+    <string name="btn_stop">Остановить мониторинг</string>
+    <string name="status_idle">Анализ звука: Ожидание</string>
+    <string name="btn_start">Начать мониторинг</string>
+    <string name="suggestion_default">Предложение: —</string>
+    <string name="permissions_required">Для анализа звука требуются разрешения</string>
+    <string name="initializing">Инициализация анализатора…</string>
+    <string name="error_msg">Ошибка: %1$s</string>
+    <string name="manual_masking">Ручная маскировка: %1$s</string>
+    <string name="ambient_masking">Фоновая маскировка: %1$s</string>
+    <string name="notification_title">SonAI Зона Фокуса</string>
+    <string name="noise_level">Уровень шума: %1$d дБ</string>
+    <string name="noise_level_default">Уровень шума: — дБ</string>
+    <string name="masking_modes_hint">Режимы маскировки</string>
+    <string name="select_modes_title">Выберите режимы</string>
+    <string name="ok">ОК</string>
+    <string name="mode_white">Глубокий космос</string>
+    <string name="mode_pink">Звездный ветер</string>
+    <string name="mode_brown">Гул земли</string>
+    <string name="mode_rain">Тропический лес</string>
+    <string name="mode_ocean">Морские волны</string>
+    <string name="mode_auto">Авто</string>
+</resources>
