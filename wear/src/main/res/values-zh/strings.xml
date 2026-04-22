@@ -1,0 +1,13 @@
+<resources>
+    <string name="app_name">SonAI</string>
+    <string name="wear_start_monitoring">开始音频</string>
+    <string name="wear_stop_monitoring">停止音频</string>
+    <string name="wear_status_idle">就绪</string>
+    <string name="wear_status_active">专注中</string>
+    <string name="mode_white">深空</string>
+    <string name="mode_pink">恒星风</string>
+    <string name="mode_brown">大地轰鸣</string>
+    <string name="mode_rain">热带雨林</string>
+    <string name="mode_ocean">海浪</string>
+    <string name="mode_auto">自动</string>
+</resources>

@@ -3,9 +3,9 @@
     <string name="status_detected">Detected: %1$s</string>
     <string name="masking_type">Masking: %1$s</string>
     <string name="monitoring_active">Focus active…</string>
-    <string name="btn_stop">Stop Focus</string>
+    <string name="btn_stop">Stop Audio</string>
     <string name="status_idle">Ready</string>
-    <string name="btn_start">Start Focus</string>
+    <string name="btn_start">Start Audio</string>
     <string name="suggestion_default">Suggestion: —</string>
     <string name="permissions_required">Permissions required for sound analysis</string>
     <string name="initializing">Initializing analyzer…</string>
@@ -24,4 +24,11 @@
     <string name="mode_rain">Rain Forest</string>
     <string name="mode_ocean">Ocean Waves</string>
     <string name="mode_auto">Auto</string>
+    <string name="timer_off">Timer Off</string>
+    <string name="timer_minutes">%1$d min</string>
+    <string name="timer_expired">Focus session ended</string>
+    <string name="smart_volume_active">Smart Volume: ON</string>
+    <string name="masking_mode_title">Masking Mode</string>
+    <string name="timer_title">Focus Timer</string>
+    <string name="off">Off</string>
 </resources>

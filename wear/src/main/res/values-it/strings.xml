@@ -1,8 +1,8 @@
 <resources>
     <string name="app_name">SonAI</string>
-    <string name="wear_start_monitoring">Avvia Focus</string>
-    <string name="wear_stop_monitoring">Ferma Focus</string>
-    <string name="wear_status_idle">Inattivo</string>
+    <string name="wear_start_monitoring">Avvia Audio</string>
+    <string name="wear_stop_monitoring">Ferma Audio</string>
+    <string name="wear_status_idle">Pronto</string>
     <string name="wear_status_active">Focus Attivo</string>
     <string name="mode_white">Spazio Profondo</string>
     <string name="mode_pink">Vento Stellare</string>

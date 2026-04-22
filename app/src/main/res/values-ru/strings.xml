@@ -3,9 +3,9 @@
     <string name="status_detected">Обнаружено: %1$s</string>
     <string name="masking_type">Маскировка: %1$s</string>
     <string name="monitoring_active">Фокус активен…</string>
-    <string name="btn_stop">Остановить фокус</string>
+    <string name="btn_stop">Остановить звук</string>
     <string name="status_idle">Готово</string>
-    <string name="btn_start">Начать фокус</string>
+    <string name="btn_start">Включить звук</string>
     <string name="suggestion_default">Предложение: —</string>
     <string name="permissions_required">Для анализа звука требуются разрешения</string>
     <string name="initializing">Инициализация анализатора…</string>
@@ -24,4 +24,11 @@
     <string name="mode_rain">Тропический лес</string>
     <string name="mode_ocean">Морские волны</string>
     <string name="mode_auto">Авто</string>
+    <string name="timer_off">Таймер выключен</string>
+    <string name="timer_minutes">%1$d мин</string>
+    <string name="timer_expired">Сессия фокуса завершена</string>
+    <string name="smart_volume_active">Умная громкость: ВКЛ</string>
+    <string name="masking_mode_title">Режим маскировки</string>
+    <string name="timer_title">Таймер фокуса</string>
+    <string name="off">Выкл</string>
 </resources>

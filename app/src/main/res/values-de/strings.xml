@@ -3,9 +3,9 @@
     <string name="status_detected">Erkannt: %1$s</string>
     <string name="masking_type">Maskierung: %1$s</string>
     <string name="monitoring_active">Fokus aktiv…</string>
-    <string name="btn_stop">Fokus stoppen</string>
+    <string name="btn_stop">Audio stoppen</string>
     <string name="status_idle">Bereit</string>
-    <string name="btn_start">Fokus starten</string>
+    <string name="btn_start">Audio starten</string>
     <string name="suggestion_default">Vorschlag: —</string>
     <string name="permissions_required">Berechtigungen für die Sound-Analyse erforderlich</string>
     <string name="initializing">Analysator wird initialisiert…</string>
@@ -24,4 +24,11 @@
     <string name="mode_rain">Regenwald</string>
     <string name="mode_ocean">Meereswellen</string>
     <string name="mode_auto">Auto</string>
+    <string name="timer_off">Timer Aus</string>
+    <string name="timer_minutes">%1$d Min.</string>
+    <string name="timer_expired">Fokus-Sitzung beendet</string>
+    <string name="smart_volume_active">Smart Volume: EIN</string>
+    <string name="masking_mode_title">Maskierungsmodus</string>
+    <string name="timer_title">Fokus-Timer</string>
+    <string name="off">Aus</string>
 </resources>

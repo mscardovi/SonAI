@@ -1,0 +1,34 @@
+<resources>
+    <string name="app_name">SonAI</string>
+    <string name="status_detected">已检测到: %1$s</string>
+    <string name="masking_type">掩蔽: %1$s</string>
+    <string name="monitoring_active">专注模式运行中…</string>
+    <string name="btn_stop">停止音频</string>
+    <string name="status_idle">就绪</string>
+    <string name="btn_start">开始音频</string>
+    <string name="suggestion_default">建议: —</string>
+    <string name="permissions_required">声音分析需要权限</string>
+    <string name="initializing">正在初始化分析器…</string>
+    <string name="error_msg">错误: %1$s</string>
+    <string name="manual_masking">手动掩蔽: %1$s</string>
+    <string name="ambient_masking">环境掩蔽: %1$s</string>
+    <string name="notification_title">SonAI 专注区域</string>
+    <string name="noise_level">噪音水平: %1$d dB</string>
+    <string name="noise_level_default">噪音水平: 0 dB</string>
+    <string name="masking_modes_hint">掩蔽模式</string>
+    <string name="select_modes_title">选择掩蔽模式</string>
+    <string name="ok">确定</string>
+    <string name="mode_white">深空</string>
+    <string name="mode_pink">恒星风</string>
+    <string name="mode_brown">大地轰鸣</string>
+    <string name="mode_rain">热带雨林</string>
+    <string name="mode_ocean">海浪</string>
+    <string name="mode_auto">自动</string>
+    <string name="timer_off">定时器关闭</string>
+    <string name="timer_minutes">%1$d 分钟</string>
+    <string name="timer_expired">专注结束</string>
+    <string name="smart_volume_active">智能音量: 开启</string>
+    <string name="masking_mode_title">掩蔽模式</string>
+    <string name="timer_title">专注计时器</string>
+    <string name="off">关闭</string>
+</resources>

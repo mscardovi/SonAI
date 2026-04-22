@@ -1,0 +1,13 @@
+<resources>
+    <string name="app_name">SonAI</string>
+    <string name="wear_start_monitoring">オーディオ開始</string>
+    <string name="wear_stop_monitoring">オーディオ停止</string>
+    <string name="wear_status_idle">準備完了</string>
+    <string name="wear_status_active">フォーカス中</string>
+    <string name="mode_white">ディープスペース</string>
+    <string name="mode_pink">ステラウィンド</string>
+    <string name="mode_brown">アースランブル</string>
+    <string name="mode_rain">レインフォレスト</string>
+    <string name="mode_ocean">オーシャンウェーブ</string>
+    <string name="mode_auto">自動</string>
+</resources>

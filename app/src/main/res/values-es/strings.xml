@@ -3,9 +3,9 @@
     <string name="status_detected">Detectado: %1$s</string>
     <string name="masking_type">Enmascaramiento: %1$s</string>
     <string name="monitoring_active">Enfoque activo…</string>
-    <string name="btn_stop">Detener enfoque</string>
+    <string name="btn_stop">Detener audio</string>
     <string name="status_idle">Listo</string>
-    <string name="btn_start">Iniciar enfoque</string>
+    <string name="btn_start">Iniciar audio</string>
     <string name="suggestion_default">Sugerencia: —</string>
     <string name="permissions_required">Permisos requeridos para el análisis de sonido</string>
     <string name="initializing">Inicializando analizador…</string>
@@ -24,4 +24,11 @@
     <string name="mode_rain">Bosque Lluvioso</string>
     <string name="mode_ocean">Olas del Mar</string>
     <string name="mode_auto">Auto</string>
+    <string name="timer_off">Temporizador desactivado</string>
+    <string name="timer_minutes">%1$d min</string>
+    <string name="timer_expired">Sesión de enfoque finalizada</string>
+    <string name="smart_volume_active">Volumen inteligente: ACTIVADO</string>
+    <string name="masking_mode_title">Modo de Enmascaramiento</string>
+    <string name="timer_title">Temporizador de Enfoque</string>
+    <string name="off">Apagado</string>
 </resources>

@@ -1,7 +1,7 @@
 <resources>
     <string name="app_name">SonAI</string>
-    <string name="wear_start_monitoring">Iniciar Enfoque</string>
-    <string name="wear_stop_monitoring">Detener Enfoque</string>
+    <string name="wear_start_monitoring">Iniciar Audio</string>
+    <string name="wear_stop_monitoring">Detener Audio</string>
     <string name="wear_status_idle">Listo</string>
     <string name="wear_status_active">Enfoque Activo</string>
     <string name="mode_white">Espacio Profundo</string>

@@ -16,13 +16,15 @@ class NoiseGenerator {
         private const val TAG = "NoiseGenerator"
         private const val SAMPLE_RATE = 44100
         private const val MAX_TOTAL_VOLUME = 0.5f
-        private const val VOL_FADE_SPEED = 0.0001f // Faster fade (approx 0.2s)
+        private const val VOL_FADE_SPEED = 0.00002f // Slower fade for smooth atmospheric changes
     }
 
     private var audioTrack: AudioTrack? = null
     private var isPlaying = false
     private var thread: Thread? = null
     
+    private var masterVolume = 0.5f
+    private var targetMasterVolume = 0.5f
     private val activeVolumes = NoiseType.entries.associateWith { 0f }.toMutableMap()
     private val targetVolumes = NoiseType.entries.associateWith { 0f }.toMutableMap()
     
@@ -34,6 +36,12 @@ class NoiseGenerator {
         EARTH_RUMBLE(R.string.mode_brown),
         RAIN_FOREST(R.string.mode_rain),
         OCEAN_WAVES(R.string.mode_ocean)
+    }
+
+    fun setMasterVolume(volume: Float) {
+        lock.withLock {
+            targetMasterVolume = volume.coerceIn(0.1f, 1.0f)
+        }
     }
 
     fun setModes(types: Set<NoiseType>) {
@@ -128,7 +136,13 @@ class NoiseGenerator {
                 sampleCount++
                 val rawWhite = Random.nextFloat() * 2 - 1
                 
-                // 0. Update volumes per-sample for instant response
+                // 0. Update master and individual volumes per-sample
+                val masterTarget = lock.withLock { targetMasterVolume }
+                if (masterVolume != masterTarget) {
+                    masterVolume = if (masterTarget > masterVolume) (masterVolume + VOL_FADE_SPEED).coerceAtMost(masterTarget)
+                                   else (masterVolume - VOL_FADE_SPEED).coerceAtLeast(masterTarget)
+                }
+
                 NoiseType.entries.forEach { type ->
                     val target = targets[type] ?: 0f
                     val current = activeVolumes[type] ?: 0f
@@ -259,7 +273,7 @@ class NoiseGenerator {
                 mixed += rainOut * (activeVolumes[NoiseType.RAIN_FOREST] ?: 0f)
                 mixed += oceanFinalOut * (activeVolumes[NoiseType.OCEAN_WAVES] ?: 0f)
                 
-                val finalOut = (mixed.coerceIn(-1.5f, 1.5f) / 1.5f).coerceIn(-1f, 1f) * MAX_TOTAL_VOLUME
+                val finalOut = (mixed.coerceIn(-1.5f, 1.5f) / 1.5f).coerceIn(-1f, 1f) * MAX_TOTAL_VOLUME * masterVolume
                 samples[i] = (finalOut * Short.MAX_VALUE).toInt().toShort()
             }
             track.write(samples, 0, samples.size)

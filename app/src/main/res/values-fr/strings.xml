@@ -3,9 +3,9 @@
     <string name="status_detected">Détecté : %1$s</string>
     <string name="masking_type">Masquage : %1$s</string>
     <string name="monitoring_active">Focus actif…</string>
-    <string name="btn_stop">Arrêter le focus</string>
+    <string name="btn_stop">Arrêter l\'audio</string>
     <string name="status_idle">Prêt</string>
-    <string name="btn_start">Démarrer le focus</string>
+    <string name="btn_start">Démarrer l\'audio</string>
     <string name="suggestion_default">Suggestion : —</string>
     <string name="permissions_required">Autorisations requises pour l\'analyse sonore</string>
     <string name="initializing">Initialisation de l\'analyseur…</string>
@@ -24,4 +24,11 @@
     <string name="mode_rain">Forêt Tropicale</string>
     <string name="mode_ocean">Vagues de l\'Océan</string>
     <string name="mode_auto">Auto</string>
+    <string name="timer_off">Minuteur désactivé</string>
+    <string name="timer_minutes">%1$d min</string>
+    <string name="timer_expired">Session de focus terminée</string>
+    <string name="smart_volume_active">Volume intelligent : ACTIVÉ</string>
+    <string name="masking_mode_title">Mode de Masquage</string>
+    <string name="timer_title">Minuteur de Focus</string>
+    <string name="off">Désactivé</string>
 </resources>

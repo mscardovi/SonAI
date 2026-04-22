@@ -35,6 +35,10 @@ class SoundAnalysisService : LifecycleService() {
     
     private var isAutoMode = true
     private var manualModes = setOf<NoiseGenerator.NoiseType>()
+    
+    // Smooth weights for Auto mode transitions
+    private val smoothedWeights = NoiseGenerator.NoiseType.entries.associateWith { 0f }.toMutableMap()
+    private val smoothingFactor = 0.2f // Higher = faster, Lower = smoother
 
     companion object {
         private const val TAG = "SoundAnalysisService"
@@ -85,23 +89,35 @@ class SoundAnalysisService : LifecycleService() {
 
     private var audioRecord: AudioRecord? = null
     private var isAnalysisRunning = false
+    
+    private var remainingSeconds = -1
+    private var timerCountdown: Timer? = null
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         if (intent?.action == ACTION_STOP) {
             stopSelf()
             return START_NOT_STICKY
         }
-        val modes = intent?.getStringArrayExtra("EXTRA_MODES")
         
-        if (modes == null || modes.contains("AUTO")) {
-            isAutoMode = true
-        } else {
-            isAutoMode = false
-            manualModes = modes.mapNotNull { 
-                try { NoiseGenerator.NoiseType.valueOf(it) } catch (e: Exception) { null }
-            }.toSet()
-            // Apply manual modes immediately
-            noiseGenerator.setModes(manualModes)
+        val modes = intent?.getStringArrayExtra("EXTRA_MODES")
+        val timerMinutes = intent?.getIntExtra("EXTRA_TIMER", -1) ?: -1
+        
+        if (timerMinutes > 0) {
+            startTimer(timerMinutes)
+        } else if (timerMinutes == 0) {
+            stopTimer()
+        }
+
+        if (modes != null) {
+            if (modes.contains("AUTO")) {
+                isAutoMode = true
+            } else {
+                isAutoMode = false
+                manualModes = modes.mapNotNull { 
+                    try { NoiseGenerator.NoiseType.valueOf(it) } catch (e: Exception) { null }
+                }.toSet()
+                noiseGenerator.setModes(manualModes)
+            }
         }
 
         // Dynamically start/stop analysis based on mode change
@@ -112,6 +128,27 @@ class SoundAnalysisService : LifecycleService() {
         }
 
         return super.onStartCommand(intent, flags, startId)
+    }
+
+    private fun startTimer(minutes: Int) {
+        remainingSeconds = minutes * 60
+        timerCountdown?.cancel()
+        timerCountdown = Timer()
+        timerCountdown?.schedule(object : TimerTask() {
+            override fun run() {
+                if (remainingSeconds > 0) {
+                    remainingSeconds--
+                } else {
+                    stopSelf()
+                }
+            }
+        }, 1000, 1000)
+    }
+
+    private fun stopTimer() {
+        remainingSeconds = -1
+        timerCountdown?.cancel()
+        timerCountdown = null
     }
 
     private fun stopAnalysis() {
@@ -129,7 +166,7 @@ class SoundAnalysisService : LifecycleService() {
         // Update UI to show manual masking status
         val modeNames = manualModes.joinToString(", ") { getString(it.resId) }
         updateNotification(getString(R.string.manual_masking, modeNames))
-        sendUpdateToUI("", modeNames, 0.1f, 0)
+        sendUpdateToUI("", modeNames, 0.1f, 0, remainingSeconds)
     }
 
     private fun startAnalysis() {
@@ -224,11 +261,20 @@ class SoundAnalysisService : LifecycleService() {
                 
                 Log.d(TAG, "Analysis result - Label: '$label', RMS: $rms, dB: $db")
 
+                // Adaptive Volume Logic: 
+                // Map dB (range ~35 to ~75) to a master volume multiplier (0.4 to 1.0)
+                if (isAutoMode) {
+                    val adaptiveVol = ((db - 35) / 40.0).coerceIn(0.4, 1.0).toFloat()
+                    noiseGenerator.setMasterVolume(adaptiveVol)
+                } else {
+                    noiseGenerator.setMasterVolume(0.7f) // Consistent volume for manual mode
+                }
+
                 val finalModes = if (isAutoMode) {
                     val suggestion = getNoiseTypeForLabel(label)
                     
-                    // Base weights: neutral and very subtle for others
-                    val weights = mutableMapOf(
+                    // Target weights based on current detection
+                    val targets = mutableMapOf(
                         NoiseGenerator.NoiseType.DEEP_SPACE to 0.15f,
                         NoiseGenerator.NoiseType.STELLAR_WIND to 0.05f,
                         NoiseGenerator.NoiseType.EARTH_RUMBLE to 0.05f,
@@ -237,16 +283,22 @@ class SoundAnalysisService : LifecycleService() {
                     )
                     
                     if (suggestion != null) {
-                        weights[suggestion] = 0.9f
+                        targets[suggestion] = 0.9f
                     } else {
-                        // Default to a bit more Deep Space if silent
-                        weights[NoiseGenerator.NoiseType.DEEP_SPACE] = 0.35f
+                        targets[NoiseGenerator.NoiseType.DEEP_SPACE] = 0.35f
+                    }
+
+                    // Apply EMA smoothing to the weights
+                    NoiseGenerator.NoiseType.entries.forEach { type ->
+                        val current = smoothedWeights[type] ?: 0f
+                        val target = targets[type] ?: 0f
+                        smoothedWeights[type] = (target * smoothingFactor) + (current * (1f - smoothingFactor))
                     }
                     
-                    noiseGenerator.setWeightedModes(weights)
+                    noiseGenerator.setWeightedModes(smoothedWeights)
                     
-                    // Show dominant mode in UI
-                    weights.filter { it.value > 0.3f }.keys.ifEmpty { setOf(NoiseGenerator.NoiseType.DEEP_SPACE) }
+                    // Show dominant modes in UI based on smoothed values
+                    smoothedWeights.filter { it.value > 0.3f }.keys.ifEmpty { setOf(NoiseGenerator.NoiseType.DEEP_SPACE) }
                 } else {
                     noiseGenerator.setModes(manualModes)
                     manualModes
@@ -262,18 +314,20 @@ class SoundAnalysisService : LifecycleService() {
                 }
                 
                 updateNotification(message)
-                sendUpdateToUI(label, modeNames, amplitude, db.toInt())
+                sendUpdateToUI(label, modeNames, amplitude, db.toInt(), remainingSeconds, isAutoMode)
             }
         }, 0, 1000)
     }
 
-    private fun sendUpdateToUI(label: String, masking: String, amplitude: Float, db: Int) {
+    private fun sendUpdateToUI(label: String, masking: String, amplitude: Float, db: Int, timerSeconds: Int = -1, isAuto: Boolean = true) {
         val intent = Intent("SoundAnalysisUpdate").apply {
             setPackage(packageName)
             putExtra("label", label)
             putExtra("masking", masking)
             putExtra("amplitude", amplitude)
             putExtra("db", db)
+            putExtra("timer_seconds", timerSeconds)
+            putExtra("is_auto", isAuto)
         }
         sendBroadcast(intent)
     }

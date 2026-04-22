@@ -1,7 +1,7 @@
 <resources>
     <string name="app_name">SonAI</string>
-    <string name="wear_start_monitoring">Démarrer Focus</string>
-    <string name="wear_stop_monitoring">Arrêter Focus</string>
+    <string name="wear_start_monitoring">Démarrer Audio</string>
+    <string name="wear_stop_monitoring">Arrêter Audio</string>
     <string name="wear_status_idle">Prêt</string>
     <string name="wear_status_active">Focus Actif</string>
     <string name="mode_white">Espace Profond</string>

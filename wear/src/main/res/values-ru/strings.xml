@@ -1,7 +1,7 @@
 <resources>
     <string name="app_name">SonAI</string>
-    <string name="wear_start_monitoring">Начать Фокус</string>
-    <string name="wear_stop_monitoring">Остановить Фокус</string>
+    <string name="wear_start_monitoring">Включить звук</string>
+    <string name="wear_stop_monitoring">Остановить звук</string>
     <string name="wear_status_idle">Готово</string>
     <string name="wear_status_active">Фокус активен</string>
     <string name="mode_white">Глубокий космос</string>

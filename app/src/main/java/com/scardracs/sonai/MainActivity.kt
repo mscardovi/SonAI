@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.material.icons.Icons
@@ -31,6 +32,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -49,6 +51,7 @@ import com.scardracs.sonai.audio.NoiseGenerator
 import com.scardracs.sonai.service.SoundAnalysisService
 import com.scardracs.sonai.ui.components.WaveformComposable
 import com.scardracs.sonai.ui.theme.SonAITheme
+import kotlin.math.roundToInt
 
 class MainActivity : ComponentActivity() {
 
@@ -56,11 +59,13 @@ class MainActivity : ComponentActivity() {
     private var detectedLabel by mutableStateOf("")
     private var maskingSuggestion by mutableStateOf("")
     private var noiseLevel by mutableIntStateOf(0)
+    private var selectedTimerMinutes by mutableIntStateOf(0)
     private val magnitudes = mutableStateListOf<Float>().apply {
-        repeat(30) { add(0.1f) }
+        repeat(50) { add(0.1f) }
     }
     
     private val allModeKeys = arrayOf("AUTO", "DEEP_SPACE", "STELLAR_WIND", "EARTH_RUMBLE", "RAIN_FOREST", "OCEAN_WAVES")
+    private val timerOptions = listOf(0, 15, 30, 45, 60, 90, 120)
     private var selectedModes by mutableStateOf(setOf("AUTO"))
 
     private val updateReceiver = object : BroadcastReceiver() {
@@ -69,6 +74,20 @@ class MainActivity : ComponentActivity() {
             maskingSuggestion = intent?.getStringExtra("masking") ?: ""
             val amplitude = intent?.getFloatExtra("amplitude", 0.1f) ?: 0.1f
             noiseLevel = intent?.getIntExtra("db", 0) ?: 0
+            val isAuto = intent?.getBooleanExtra("is_auto", true) ?: true
+            
+            // Sync current state from service
+            if (isMonitoring) {
+                val currentModes = maskingSuggestion.split(", ")
+                // We don't want to overwrite user selection while they are in the dialog,
+                // but we need to know if service is in auto mode
+            }
+
+            // Auto-scroll timer slider as time passes
+            val seconds = intent?.getIntExtra("timer_seconds", -1) ?: -1
+            if (seconds >= 0) {
+                selectedTimerMinutes = (seconds / 60f).roundToInt()
+            }
 
             magnitudes.removeAt(0)
             magnitudes.add(amplitude.coerceIn(0.1f, 1.0f))
@@ -140,6 +159,14 @@ class MainActivity : ComponentActivity() {
                 )
 
                 Text(text = stringResource(R.string.noise_level, noiseLevel))
+                
+                if (isMonitoring && selectedModes.contains("AUTO")) {
+                    Text(
+                        text = stringResource(R.string.smart_volume_active),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                }
 
                 WaveformComposable(magnitudes = magnitudes)
 
@@ -147,24 +174,34 @@ class MainActivity : ComponentActivity() {
                     onClick = { showDialog = true },
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    Row(
-                        modifier = Modifier
-                            .padding(16.dp)
-                            .fillMaxWidth(),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        Column {
-                            Text(
-                                text = stringResource(R.string.masking_modes_hint),
-                                style = MaterialTheme.typography.labelMedium
-                            )
-                            Text(
-                                text = selectedModes.joinToString(", ") { getModeDisplayName(it) },
-                                style = MaterialTheme.typography.bodyLarge
-                            )
+                    Column(modifier = Modifier.padding(16.dp)) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            Column {
+                                Text(
+                                    text = stringResource(R.string.masking_modes_hint),
+                                    style = MaterialTheme.typography.labelMedium
+                                )
+                                Text(
+                                    text = selectedModes.joinToString(", ") { getModeDisplayName(it) },
+                                    style = MaterialTheme.typography.bodyLarge
+                                )
+                            }
+                            Icon(Icons.Default.Settings, contentDescription = null)
                         }
-                        Icon(Icons.Default.Settings, contentDescription = null)
+                        
+                        Spacer(modifier = Modifier.height(8.dp))
+                        
+                        Text(
+                            text = if (selectedTimerMinutes > 0) 
+                                stringResource(R.string.timer_minutes, selectedTimerMinutes)
+                            else 
+                                stringResource(R.string.timer_off),
+                            style = MaterialTheme.typography.labelSmall
+                        )
                     }
                 }
 
@@ -206,6 +243,7 @@ class MainActivity : ComponentActivity() {
             title = { Text(stringResource(R.string.select_modes_title)) },
             text = {
                 Column {
+                    Text(text = stringResource(R.string.masking_mode_title), style = MaterialTheme.typography.labelLarge)
                     allModeKeys.forEach { mode ->
                         val isChecked = selectedModes.contains(mode)
                         Row(
@@ -216,10 +254,13 @@ class MainActivity : ComponentActivity() {
                                     onClick = {
                                         val newSet = selectedModes.toMutableSet()
                                         if (mode == "AUTO") {
-                                            newSet.clear()
-                                            newSet.add("AUTO")
+                                            if (isChecked) {
+                                                newSet.remove("AUTO")
+                                                if (newSet.isEmpty()) newSet.add("DEEP_SPACE")
+                                            } else {
+                                                newSet.add("AUTO")
+                                            }
                                         } else {
-                                            newSet.remove("AUTO")
                                             if (isChecked) {
                                                 newSet.remove(mode)
                                                 if (newSet.isEmpty()) newSet.add("AUTO")
@@ -230,16 +271,41 @@ class MainActivity : ComponentActivity() {
                                         selectedModes = newSet
                                     }
                                 )
-                                .padding(vertical = 8.dp),
+                                .padding(vertical = 4.dp),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Checkbox(
-                                checked = isChecked,
-                                onCheckedChange = null // Handled by Row selectable
-                            )
+                            Checkbox(checked = isChecked, onCheckedChange = null)
+                            Text(text = getModeDisplayName(mode), modifier = Modifier.padding(start = 8.dp))
+                        }
+                    }
+                    
+                    Spacer(modifier = Modifier.height(16.dp))
+                    
+                    Text(text = stringResource(R.string.timer_title), style = MaterialTheme.typography.labelLarge)
+                    
+                    // Continuous slider that reflects real-time progress while still allowing manual selection
+                    Slider(
+                        value = selectedTimerMinutes.toFloat(),
+                        onValueChange = { 
+                            // Manual snapping to timer options during user interaction
+                            val snapped = timerOptions.minByOrNull { opt -> kotlin.math.abs(opt - it) } ?: 0
+                            selectedTimerMinutes = snapped 
+                        },
+                        valueRange = 0f..120f,
+                        modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp)
+                    )
+                    
+                    Row(
+                        modifier = Modifier.fillMaxWidth().padding(horizontal = 4.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        timerOptions.forEach { mins ->
+                            // Highlight the label closest to the current timer value
+                            val isClosest = mins == timerOptions.minByOrNull { kotlin.math.abs(it - selectedTimerMinutes) }
                             Text(
-                                text = getModeDisplayName(mode),
-                                modifier = Modifier.padding(start = 8.dp)
+                                text = if (mins == 0) stringResource(R.string.off) else "${mins}m",
+                                style = MaterialTheme.typography.labelSmall,
+                                color = if (isClosest) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
                             )
                         }
                     }
@@ -248,7 +314,6 @@ class MainActivity : ComponentActivity() {
             confirmButton = {
                 TextButton(onClick = {
                     onDismiss()
-                    // Always start or update service when modes are confirmed
                     if (checkPermissions()) {
                         startSoundAnalysisService()
                     } else {
@@ -263,7 +328,7 @@ class MainActivity : ComponentActivity() {
 
     private fun getModeDisplayName(mode: String): String {
         return when (mode) {
-            "AUTO" -> getString(R.string.mode_auto)
+            "AUTO" -> "Auto (AI)"
             else -> {
                 try {
                     val noiseType = NoiseGenerator.NoiseType.valueOf(mode)
@@ -316,6 +381,7 @@ class MainActivity : ComponentActivity() {
     private fun startSoundAnalysisService() {
         val intent = Intent(this, SoundAnalysisService::class.java)
         intent.putExtra("EXTRA_MODES", selectedModes.toTypedArray())
+        intent.putExtra("EXTRA_TIMER", selectedTimerMinutes)
         startForegroundService(intent)
         isMonitoring = true
         detectedLabel = getString(R.string.monitoring_active)
