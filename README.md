@@ -28,7 +28,7 @@ SonAI is a professional Android application designed to enhance concentration, r
 - **AI/ML**: MediaPipe Audio Classifier (YAMNet)
 - **Audio Engine**: Procedural synthesis via `AudioTrack` (PCM 16-bit, 44.1kHz)
 - **Minimum SDK**: 30 (Android 11)
-- **Target SDK**: 37 (Android 15)
+- **Target SDK**: 37 (Android 17)
 - **Build System**: Gradle 9.1.1 (Kotlin DSL)
 
 ## 📂 Project Structure
