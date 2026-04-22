@@ -1,6 +1,6 @@
 # SonAI Privacy Policy
 
-Last updated: [Insert Date]
+Last updated: 04/22/2026
 
 SonAI ("we", "our", or "the Application") values your privacy. This Privacy Policy explains how we collect, use, and protect your information when you use our mobile application.
 
