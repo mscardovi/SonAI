@@ -2,10 +2,10 @@
     <string name="app_name">SonAI</string>
     <string name="status_detected">Обнаружено: %1$s</string>
     <string name="masking_type">Маскировка: %1$s</string>
-    <string name="monitoring_active">Мониторинг активен…</string>
-    <string name="btn_stop">Остановить мониторинг</string>
-    <string name="status_idle">Анализ звука: Ожидание</string>
-    <string name="btn_start">Начать мониторинг</string>
+    <string name="monitoring_active">Фокус активен…</string>
+    <string name="btn_stop">Остановить фокус</string>
+    <string name="status_idle">Готово</string>
+    <string name="btn_start">Начать фокус</string>
     <string name="suggestion_default">Предложение: —</string>
     <string name="permissions_required">Для анализа звука требуются разрешения</string>
     <string name="initializing">Инициализация анализатора…</string>

@@ -121,10 +121,14 @@ class MainActivity : ComponentActivity() {
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 Text(
-                    text = if (isMonitoring) 
-                        stringResource(R.string.status_detected, detectedLabel)
-                    else 
-                        stringResource(R.string.status_idle),
+                    text = if (isMonitoring) {
+                        if (detectedLabel.isNotEmpty()) 
+                            stringResource(R.string.status_detected, detectedLabel)
+                        else 
+                            stringResource(R.string.monitoring_active)
+                    } else {
+                        stringResource(R.string.status_idle)
+                    },
                     style = MaterialTheme.typography.headlineSmall
                 )
 
@@ -244,7 +248,12 @@ class MainActivity : ComponentActivity() {
             confirmButton = {
                 TextButton(onClick = {
                     onDismiss()
-                    if (isMonitoring) startSoundAnalysisService()
+                    // Always start or update service when modes are confirmed
+                    if (checkPermissions()) {
+                        startSoundAnalysisService()
+                    } else {
+                        requestPermissions()
+                    }
                 }) {
                     Text(stringResource(R.string.ok))
                 }

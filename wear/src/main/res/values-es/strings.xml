@@ -2,7 +2,7 @@
     <string name="app_name">SonAI</string>
     <string name="wear_start_monitoring">Iniciar Enfoque</string>
     <string name="wear_stop_monitoring">Detener Enfoque</string>
-    <string name="wear_status_idle">Inactivo</string>
+    <string name="wear_status_idle">Listo</string>
     <string name="wear_status_active">Enfoque Activo</string>
     <string name="mode_white">Espacio Profundo</string>
     <string name="mode_pink">Viento Estelar</string>

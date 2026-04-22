@@ -83,12 +83,16 @@ class SoundAnalysisService : LifecycleService() {
         }
     }
 
+    private var audioRecord: AudioRecord? = null
+    private var isAnalysisRunning = false
+
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         if (intent?.action == ACTION_STOP) {
             stopSelf()
             return START_NOT_STICKY
         }
         val modes = intent?.getStringArrayExtra("EXTRA_MODES")
+        
         if (modes == null || modes.contains("AUTO")) {
             isAutoMode = true
         } else {
@@ -96,11 +100,42 @@ class SoundAnalysisService : LifecycleService() {
             manualModes = modes.mapNotNull { 
                 try { NoiseGenerator.NoiseType.valueOf(it) } catch (e: Exception) { null }
             }.toSet()
+            // Apply manual modes immediately
+            noiseGenerator.setModes(manualModes)
         }
+
+        // Dynamically start/stop analysis based on mode change
+        if (isAutoMode && !isAnalysisRunning) {
+            startAnalysis()
+        } else if (!isAutoMode && isAnalysisRunning) {
+            stopAnalysis()
+        }
+
         return super.onStartCommand(intent, flags, startId)
     }
 
+    private fun stopAnalysis() {
+        isAnalysisRunning = false
+        timer?.cancel()
+        timer = null
+        try {
+            audioRecord?.stop()
+            audioRecord?.release()
+        } catch (e: Exception) {
+            Log.e(TAG, "Error stopping AudioRecord", e)
+        }
+        audioRecord = null
+        
+        // Update UI to show manual masking status
+        val modeNames = manualModes.joinToString(", ") { getString(it.resId) }
+        updateNotification(getString(R.string.manual_masking, modeNames))
+        sendUpdateToUI("", modeNames, 0.1f, 0)
+    }
+
     private fun startAnalysis() {
+        if (isAnalysisRunning) return
+        isAnalysisRunning = true
+        
         val classifier = audioClassifier ?: return
         val sampleRate = 16000 
         val sampleCount = 16000
@@ -117,7 +152,7 @@ class SoundAnalysisService : LifecycleService() {
             return
         }
 
-        val audioRecord = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+        val record = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             val attributionContext = createAttributionContext("sound_analysis")
             AudioRecord.Builder()
                 .setAudioSource(AudioSource.MIC)
@@ -139,14 +174,17 @@ class SoundAnalysisService : LifecycleService() {
             )
         }
         
-        if (audioRecord.state != AudioRecord.STATE_INITIALIZED) {
+        if (record.state != AudioRecord.STATE_INITIALIZED) {
             Log.e(TAG, "AudioRecord failed to initialize")
+            isAnalysisRunning = false
             return
         }
 
+        audioRecord = record
         try {
-            audioRecord.startRecording()
+            record.startRecording()
         } catch (e: IllegalStateException) {
+            isAnalysisRunning = false
             return
         }
 
@@ -161,7 +199,7 @@ class SoundAnalysisService : LifecycleService() {
                     sampleCount
                 )
                 
-                val loadedSamples = audioData.load(audioRecord)
+                val loadedSamples = audioData.load(record)
                 if (loadedSamples <= 0) return
 
                 // Calculate dB Level from the internal float array
@@ -188,16 +226,31 @@ class SoundAnalysisService : LifecycleService() {
 
                 val finalModes = if (isAutoMode) {
                     val suggestion = getNoiseTypeForLabel(label)
-                    if (suggestion == null) {
-                        setOf(NoiseGenerator.NoiseType.DEEP_SPACE)
+                    
+                    // Base weights: neutral and very subtle for others
+                    val weights = mutableMapOf(
+                        NoiseGenerator.NoiseType.DEEP_SPACE to 0.15f,
+                        NoiseGenerator.NoiseType.STELLAR_WIND to 0.05f,
+                        NoiseGenerator.NoiseType.EARTH_RUMBLE to 0.05f,
+                        NoiseGenerator.NoiseType.RAIN_FOREST to 0.05f,
+                        NoiseGenerator.NoiseType.OCEAN_WAVES to 0.05f
+                    )
+                    
+                    if (suggestion != null) {
+                        weights[suggestion] = 0.9f
                     } else {
-                        setOf(suggestion)
+                        // Default to a bit more Deep Space if silent
+                        weights[NoiseGenerator.NoiseType.DEEP_SPACE] = 0.35f
                     }
+                    
+                    noiseGenerator.setWeightedModes(weights)
+                    
+                    // Show dominant mode in UI
+                    weights.filter { it.value > 0.3f }.keys.ifEmpty { setOf(NoiseGenerator.NoiseType.DEEP_SPACE) }
                 } else {
+                    noiseGenerator.setModes(manualModes)
                     manualModes
                 }
-                
-                noiseGenerator.setModes(finalModes)
 
                 val modeNames = finalModes.joinToString(", ") { getString(it.resId) }
                 val message = if (!isAutoMode) {
@@ -228,21 +281,31 @@ class SoundAnalysisService : LifecycleService() {
     private fun getNoiseTypeForLabel(label: String): NoiseGenerator.NoiseType? {
         val l = label.lowercase()
         return when {
+            // High frequency / Voice / Melodic -> Stellar Wind (Pinkish/Whistle)
             l.contains("speech") || l.contains("voice") || l.contains("conversation") || 
             l.contains("shouting") || l.contains("laughter") || l.contains("music") || 
-            l.contains("singing") -> NoiseGenerator.NoiseType.STELLAR_WIND
+            l.contains("singing") || l.contains("bird") || l.contains("whistle") -> NoiseGenerator.NoiseType.STELLAR_WIND
             
+            // Low frequency / Mechanical / Deep -> Earth Rumble (Brown/Rumble)
             l.contains("tool") || l.contains("hammer") || l.contains("drill") || 
             l.contains("engine") || l.contains("vacuum") || l.contains("fan") || 
-            l.contains("ac") -> NoiseGenerator.NoiseType.EARTH_RUMBLE
+            l.contains("ac") || l.contains("heavy") || l.contains("truck") || 
+            l.contains("explosion") || l.contains("thunder") -> NoiseGenerator.NoiseType.EARTH_RUMBLE
             
-            l.contains("rain") || l.contains("liquid") -> NoiseGenerator.NoiseType.RAIN_FOREST
+            // Rain / Splashing / Forest -> Rain Forest
+            l.contains("rain") || l.contains("liquid") || l.contains("drip") || 
+            l.contains("stream") || l.contains("river") || l.contains("forest") ||
+            l.contains("cricket") || l.contains("insect") -> NoiseGenerator.NoiseType.RAIN_FOREST
             
-            l.contains("water") || l.contains("ocean") || l.contains("sea") || l.contains("wave") -> NoiseGenerator.NoiseType.OCEAN_WAVES
+            // Waves / Large water / Coastal -> Ocean Waves
+            l.contains("ocean") || l.contains("sea") || l.contains("wave") || 
+            l.contains("beach") || l.contains("surf") -> NoiseGenerator.NoiseType.OCEAN_WAVES
 
+            // Urban / Background / Static -> Deep Space (White/Hum)
             l.contains("traffic") || l.contains("car") || l.contains("wind") || 
             l.contains("typing") || l.contains("keyboard") || l.contains("office") ||
-            l.contains("clink") || l.contains("cup") -> NoiseGenerator.NoiseType.DEEP_SPACE
+            l.contains("clink") || l.contains("cup") || l.contains("waterfall") ||
+            l.contains("water") || l.contains("whoosh") -> NoiseGenerator.NoiseType.DEEP_SPACE
 
             else -> null
         }
@@ -289,7 +352,7 @@ class SoundAnalysisService : LifecycleService() {
     override fun onDestroy() {
         super.onDestroy()
         instance = null
-        timer?.cancel()
+        stopAnalysis()
         audioClassifier?.close()
         noiseGenerator.stop()
     }

@@ -2,10 +2,10 @@
     <string name="app_name">SonAI</string>
     <string name="status_detected">Rilevato: %1$s</string>
     <string name="masking_type">Mascheramento: %1$s</string>
-    <string name="monitoring_active">Monitoraggio attivo…</string>
-    <string name="btn_stop">Interrompi Monitoraggio</string>
-    <string name="status_idle">Analisi Sonora: Inattiva</string>
-    <string name="btn_start">Avvia Monitoraggio</string>
+    <string name="monitoring_active">Focus attivo…</string>
+    <string name="btn_stop">Ferma Focus</string>
+    <string name="status_idle">Pronto</string>
+    <string name="btn_start">Avvia Focus</string>
     <string name="suggestion_default">Suggerimento: —</string>
     <string name="permissions_required">Permessi richiesti per l\'analisi sonora</string>
     <string name="initializing">Inizializzazione analizzatore…</string>
