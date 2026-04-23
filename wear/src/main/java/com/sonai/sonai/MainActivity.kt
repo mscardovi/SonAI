@@ -81,15 +81,10 @@ private fun rememberSoundAnalysisState(
     }
 
     LaunchedEffect(Unit) {
-        val flags = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
-            android.content.Context.RECEIVER_NOT_EXPORTED
-        } else {
-            0
-        }
         context.registerReceiver(
             statusReceiver,
             android.content.IntentFilter("SoundAnalysisStatus"),
-            flags
+            android.content.Context.RECEIVER_NOT_EXPORTED
         )
         scope.launch { commManager.sendCommand("GET_STATUS") }
     }

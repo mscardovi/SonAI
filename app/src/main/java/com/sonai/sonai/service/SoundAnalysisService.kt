@@ -14,7 +14,6 @@ import android.content.pm.ServiceInfo
 import android.media.AudioFormat
 import android.media.AudioRecord
 import android.media.MediaRecorder.AudioSource
-import android.os.Build
 import android.util.Log
 import androidx.annotation.RequiresPermission
 import androidx.core.app.ActivityCompat
@@ -343,29 +342,19 @@ class SoundAnalysisService : LifecycleService() {
 
     @RequiresPermission(Manifest.permission.RECORD_AUDIO)
     private fun createAudioRecord(bufferSizeInBytes: Int): AudioRecord {
-        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            val attributionContext = createAttributionContext("sound_analysis")
-            AudioRecord.Builder()
-                .setAudioSource(AudioSource.MIC)
-                .setAudioFormat(
-                    AudioFormat.Builder()
-                        .setEncoding(AudioFormat.ENCODING_PCM_16BIT)
-                        .setSampleRate(SAMPLE_RATE)
-                        .setChannelMask(AudioFormat.CHANNEL_IN_MONO)
-                        .build()
-                )
-                .setBufferSizeInBytes(bufferSizeInBytes)
-                .setContext(attributionContext)
-                .build()
-        } else {
-            AudioRecord(
-                AudioSource.MIC,
-                SAMPLE_RATE,
-                AudioFormat.CHANNEL_IN_MONO,
-                AudioFormat.ENCODING_PCM_16BIT,
-                bufferSizeInBytes
+        val attributionContext = createAttributionContext("sound_analysis")
+        return AudioRecord.Builder()
+            .setAudioSource(AudioSource.MIC)
+            .setAudioFormat(
+                AudioFormat.Builder()
+                    .setEncoding(AudioFormat.ENCODING_PCM_16BIT)
+                    .setSampleRate(SAMPLE_RATE)
+                    .setChannelMask(AudioFormat.CHANNEL_IN_MONO)
+                    .build()
             )
-        }
+            .setBufferSizeInBytes(bufferSizeInBytes)
+            .setContext(attributionContext)
+            .build()
     }
 
     private fun startSessionInDb(minutes: Int) {
