@@ -23,7 +23,7 @@
             <InsightsFilterSettings>
               <option name="connection">
                 <ConnectionSetting>
-                  <option name="appId" value="com.scardracs.sonai" />
+                  <option name="appId" value="com.sonai.sonai" />
                   <option name="mobileSdkAppId" value="1:922435295895:android:ce8a9526653a65bb4f27d2" />
                   <option name="projectId" value="debug-8caab03b" />
                   <option name="projectNumber" value="922435295895" />
