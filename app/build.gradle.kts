@@ -16,8 +16,13 @@ if (localPropertiesFile.exists()) {
 }
 
 android {
-    namespace = "com.scardracs.sonai"
+    namespace = "com.sonai.sonai"
     compileSdk = 37
+
+    buildFeatures {
+        buildConfig = true
+        compose = true
+    }
 
     signingConfigs {
         create("release") {
@@ -29,7 +34,7 @@ android {
     }
 
     defaultConfig {
-        applicationId = "com.scardracs.sonai"
+        applicationId = "com.sonai.sonai"
         minSdk = 30
         targetSdk = 37
         versionCode = 1
@@ -52,9 +57,6 @@ android {
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_21
         targetCompatibility = JavaVersion.VERSION_21
-    }
-    buildFeatures {
-        compose = true
     }
     androidResources {
         noCompress += "tflite"
