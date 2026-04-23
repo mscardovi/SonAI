@@ -31,4 +31,9 @@
     <string name="masking_mode_title">Режим маскировки</string>
     <string name="timer_title">Таймер фокуса</string>
     <string name="off">Выкл</string>
+    <string name="binaural_title">Бинауральные ритмы</string>
+    <string name="dnd_title">Авто-DND</string>
+    <string name="geofencing_title">Геозоны (Авто-Фокус)</string>
+    <string name="stats_btn">История сессий</string>
+    <string name="streak_count">Серия фокуса: %1$d дн.!</string>
 </resources>

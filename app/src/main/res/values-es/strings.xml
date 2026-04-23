@@ -31,4 +31,9 @@
     <string name="masking_mode_title">Modo de Enmascaramiento</string>
     <string name="timer_title">Temporizador de Enfoque</string>
     <string name="off">Apagado</string>
+    <string name="binaural_title">Tonos Binaurales</string>
+    <string name="dnd_title">Auto-DND</string>
+    <string name="geofencing_title">Geovalla (Auto-Enfoque)</string>
+    <string name="stats_btn">Ver historial</string>
+    <string name="streak_count">Racha de enfoque: ¡%1$d días!</string>
 </resources>

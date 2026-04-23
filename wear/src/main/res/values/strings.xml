@@ -10,4 +10,8 @@
     <string name="mode_rain">Rain Forest</string>
     <string name="mode_ocean">Ocean Waves</string>
     <string name="mode_auto">Auto</string>
+    <string name="tile_label">Focus Zone</string>
+    <string name="tile_description">Start focus session</string>
+    <string name="complication_label">Focus Timer</string>
+    <string name="hr_stress_boost">High HR detected: Boosting masking</string>
 </resources>

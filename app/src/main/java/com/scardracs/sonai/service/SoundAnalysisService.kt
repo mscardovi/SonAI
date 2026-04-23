@@ -5,7 +5,10 @@ import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
+import android.content.BroadcastReceiver
+import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.content.pm.ServiceInfo
 import android.media.AudioFormat
@@ -16,6 +19,7 @@ import android.util.Log
 import androidx.annotation.RequiresPermission
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.LifecycleService
 import com.google.mediapipe.tasks.audio.audioclassifier.AudioClassifier
 import com.google.mediapipe.tasks.components.containers.AudioData
@@ -23,6 +27,13 @@ import com.google.mediapipe.tasks.core.BaseOptions
 import com.scardracs.sonai.MainActivity
 import com.scardracs.sonai.R
 import com.scardracs.sonai.audio.NoiseGenerator
+import com.scardracs.sonai.data.local.SonAIDatabase
+import com.scardracs.sonai.data.local.entity.NoiseEvent
+import com.scardracs.sonai.data.repository.SessionRepository
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.launch
 import java.util.Timer
 import java.util.TimerTask
 import kotlin.math.log10
@@ -45,6 +56,24 @@ class SoundAnalysisService : LifecycleService() {
 
     private var isAutoMode = true
     private var manualModes = setOf<NoiseGenerator.NoiseType>()
+    
+    private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+    private lateinit var repository: SessionRepository
+    private var currentSessionId: Long = -1
+    private val dndManager by lazy { DndManager(this) }
+    
+    private var totalNoiseForAvg = 0.0
+    private var noiseSampleCount = 0
+    private var userIgnoredLabels = mutableSetOf<String>()
+
+    private var currentHeartRate = -1
+
+    private val heartRateReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context?, intent: Intent?) {
+            currentHeartRate = intent?.getIntExtra("bpm", -1) ?: -1
+            Log.d(TAG, "Service received heart rate: $currentHeartRate")
+        }
+    }
 
     // Smooth weights for Auto mode transitions
     private val smoothedWeights =
@@ -74,6 +103,7 @@ class SoundAnalysisService : LifecycleService() {
         private const val TARGET_MIN = 0.05f
         private const val AUTO_MODE_THRESHOLD = 0.3f
         private const val DEFAULT_AMPLITUDE = 0.1f
+        private const val BINAURAL_VOLUME = 0.4f
         private const val RMS_MULTIPLIER = 10f
         private const val TIMER_INTERVAL = 1000L
 
@@ -113,6 +143,15 @@ class SoundAnalysisService : LifecycleService() {
     override fun onCreate() {
         super.onCreate()
         instance = this
+        
+        // Sync state to Wear: Service is starting
+        serviceScope.launch {
+            WearCommunicationManager(this@SoundAnalysisService).sendStatus("PLAYING")
+        }
+
+        val db = SonAIDatabase.getDatabase(this)
+        repository = SessionRepository(db.sessionDao())
+        
         createNotificationChannel()
         noiseGenerator = NoiseGenerator()
 
@@ -136,6 +175,12 @@ class SoundAnalysisService : LifecycleService() {
 
             audioClassifier = AudioClassifier.createFromOptions(this, options)
             startAnalysis()
+            
+            ContextCompat.registerReceiver(
+                this, heartRateReceiver,
+                IntentFilter("HeartRateUpdate"),
+                ContextCompat.RECEIVER_NOT_EXPORTED
+            )
         } catch (e: IllegalStateException) {
             Log.e(TAG, "Failed to initialize MediaPipe AudioClassifier", e)
             updateNotification(getString(R.string.error_msg, e.localizedMessage ?: "Unknown error"))
@@ -154,15 +199,40 @@ class SoundAnalysisService : LifecycleService() {
             return START_NOT_STICKY
         }
 
-        val modes = intent?.getStringArrayExtra("EXTRA_MODES")
+        handleTimerAndDnd(intent)
+        handleBinauralBeat(intent)
+        handleNoiseModes(intent)
+
+        return super.onStartCommand(intent, flags, startId)
+    }
+
+    private fun handleTimerAndDnd(intent: Intent?) {
         val timerMinutes = intent?.getIntExtra("EXTRA_TIMER", -1) ?: -1
+        val useDnd = intent?.getBooleanExtra("EXTRA_DND", false) ?: false
 
         if (timerMinutes > 0) {
             startTimer(timerMinutes)
+            startSessionInDb(timerMinutes)
+            if (useDnd) dndManager.setDndMode(true)
         } else if (timerMinutes == 0) {
             stopTimer()
+            dndManager.setDndMode(false)
         }
+    }
 
+    private fun handleBinauralBeat(intent: Intent?) {
+        val binauralName = intent?.getStringExtra("EXTRA_BINAURAL")
+        binauralName?.let {
+            try {
+                val type = NoiseGenerator.BinauralType.valueOf(it)
+                noiseGenerator.setBinauralBeat(type, BINAURAL_VOLUME)
+            } catch (_: Exception) {
+            }
+        }
+    }
+
+    private fun handleNoiseModes(intent: Intent?) {
+        val modes = intent?.getStringArrayExtra("EXTRA_MODES")
         if (modes != null) {
             if (modes.contains("AUTO")) {
                 isAutoMode = true
@@ -185,8 +255,6 @@ class SoundAnalysisService : LifecycleService() {
         } else if (!isAutoMode && isAnalysisRunning) {
             stopAnalysis()
         }
-
-        return super.onStartCommand(intent, flags, startId)
     }
 
     private fun startTimer(minutes: Int) {
@@ -297,6 +365,14 @@ class SoundAnalysisService : LifecycleService() {
         }
     }
 
+    private fun startSessionInDb(minutes: Int) {
+        serviceScope.launch {
+            currentSessionId = repository.startSession(System.currentTimeMillis(), minutes)
+            totalNoiseForAvg = 0.0
+            noiseSampleCount = 0
+        }
+    }
+
     private fun processAudioData(classifier: AudioClassifier, record: AudioRecord) {
         val audioData = AudioData.create(
             AudioData.AudioDataFormat.builder()
@@ -325,7 +401,28 @@ class SoundAnalysisService : LifecycleService() {
         val label = topResult?.categoryName() ?: ""
         val amplitude = topResult?.score() ?: (rms.toFloat() * RMS_MULTIPLIER).coerceIn(DEFAULT_AMPLITUDE, 1.0f)
 
+        if (label.isNotEmpty() && !userIgnoredLabels.contains(label)) {
+            recordNoiseEvent(label, db.toInt())
+        }
+        
+        totalNoiseForAvg += db
+        noiseSampleCount++
+
         updateAudioEngine(label, db, amplitude)
+    }
+
+    private fun recordNoiseEvent(label: String, db: Int) {
+        if (currentSessionId == -1L) return
+        serviceScope.launch {
+            repository.addNoiseEvent(
+                NoiseEvent(
+                    sessionId = currentSessionId,
+                    timestamp = System.currentTimeMillis(),
+                    label = label,
+                    dbLevel = db
+                )
+            )
+        }
     }
 
     private fun calculateRMS(floatArray: FloatArray): Double {
@@ -372,6 +469,11 @@ class SoundAnalysisService : LifecycleService() {
                 isAutoMode
             )
         )
+
+        // Sync state to Wear periodically during analysis
+        serviceScope.launch {
+            WearCommunicationManager(this@SoundAnalysisService).sendStatus("PLAYING")
+        }
     }
 
     private fun applyAutoModes(label: String): Set<NoiseGenerator.NoiseType> {
@@ -452,9 +554,36 @@ class SoundAnalysisService : LifecycleService() {
 
     override fun onDestroy() {
         super.onDestroy()
+        
+        // Sync state to Wear before destroying
+        serviceScope.launch {
+            WearCommunicationManager(this@SoundAnalysisService).sendStatus("IDLE")
+        }
+
         instance = null
+        
+        try {
+            unregisterReceiver(heartRateReceiver)
+        } catch (_: Exception) {}
+        
+        if (currentSessionId != -1L) {
+            val avg = if (noiseSampleCount > 0) totalNoiseForAvg / noiseSampleCount else 0.0
+            val focusIndex = calculateFocusIndex(avg, noiseSampleCount)
+            serviceScope.launch {
+                repository.endSession(currentSessionId, System.currentTimeMillis(), avg, focusIndex)
+            }
+        }
+        dndManager.setDndMode(false)
+        
         stopAnalysis()
         audioClassifier?.close()
         noiseGenerator.stop()
+    }
+
+    private fun calculateFocusIndex(avgDb: Double, count: Int): Int {
+        if (count == 0) return 100
+        val base = 100.0
+        val penalty = (avgDb - 40.0).coerceAtLeast(0.0) * 1.5
+        return (base - penalty).toInt().coerceIn(0, 100)
     }
 }

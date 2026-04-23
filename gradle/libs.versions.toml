@@ -1,6 +1,7 @@
 [versions]
 agp = "9.2.0"
-kotlin = "2.3.20"
+kotlin = "2.3.21"
+kotlinxCoroutines = "1.10.2"
 coreKtx = "1.18.0"
 junitVersion = "1.3.0"
 espressoCore = "3.7.0"
@@ -17,6 +18,15 @@ googleServices = "4.4.4"
 crashlyticsPlugin = "3.0.7"
 junitJupiter = "6.0.3"
 leakcanary = "2.14"
+room = "2.8.4"
+playServicesLocation = "21.3.0"
+playServicesWearable = "19.0.0"
+healthConnect = "1.1.0"
+wearTiles = "1.6.0"
+wearProtolayout = "1.4.0"
+wearComplications = "1.3.0"
+healthServices = "1.1.0-rc01"
+ksp = "2.3.7"
 detekt = "1.23.8"
 
 [libraries]
@@ -46,6 +56,27 @@ firebase-bom = { group = "com.google.firebase", name = "firebase-bom", version.r
 firebase-crashlytics = { group = "com.google.firebase", name = "firebase-crashlytics" }
 firebase-analytics = { group = "com.google.firebase", name = "firebase-analytics" }
 leakcanary-android = { group = "com.squareup.leakcanary", name = "leakcanary-android", version.ref = "leakcanary" }
+kotlinx-coroutines-play-services = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-play-services", version.ref = "kotlinxCoroutines" }
+
+# Room
+androidx-room-runtime = { group = "androidx.room", name = "room-runtime", version.ref = "room" }
+androidx-room-ktx = { group = "androidx.room", name = "room-ktx", version.ref = "room" }
+androidx-room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "room" }
+
+# Location & Geofencing
+play-services-location = { group = "com.google.android.gms", name = "play-services-location", version.ref = "playServicesLocation" }
+play-services-wearable = { group = "com.google.android.gms", name = "play-services-wearable", version.ref = "playServicesWearable" }
+
+# Health Connect
+androidx-health-connect = { group = "androidx.health.connect", name = "connect-client", version.ref = "healthConnect" }
+
+# Wear OS
+androidx-wear-tiles = { group = "androidx.wear.tiles", name = "tiles", version.ref = "wearTiles" }
+androidx-wear-tiles-material = { group = "androidx.wear.tiles", name = "tiles-material", version.ref = "wearTiles" }
+androidx-wear-protolayout-material3 = { group = "androidx.wear.protolayout", name = "protolayout-material3", version.ref = "wearProtolayout" }
+androidx-wear-tiles-tooling = { group = "androidx.wear.tiles", name = "tiles-tooling", version.ref = "wearTiles" }
+androidx-wear-complications-data = { group = "androidx.wear.watchface", name = "watchface-complications-data", version.ref = "wearComplications" }
+androidx-health-services = { group = "androidx.health", name = "health-services-client", version.ref = "healthServices" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
@@ -53,4 +84,5 @@ kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 google-services = { id = "com.google.gms.google-services", version.ref = "googleServices" }
 firebase-crashlytics = { id = "com.google.firebase.crashlytics", version.ref = "crashlyticsPlugin" }
+ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 detekt = { id = "io.gitlab.arturbosch.detekt", version.ref = "detekt" }

@@ -1,11 +1,12 @@
-import java.util.Properties
 import java.io.FileInputStream
+import java.util.Properties
 
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.compose.compiler)
     alias(libs.plugins.google.services)
     alias(libs.plugins.firebase.crashlytics)
+    alias(libs.plugins.ksp)
 }
 
 val localProperties = Properties()
@@ -32,7 +33,7 @@ android {
         minSdk = 30
         targetSdk = 37
         versionCode = 1
-        versionName = "1.0.1"
+        versionName = "1.0.2"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -60,7 +61,8 @@ android {
     }
     packaging {
         resources {
-            excludes += "/META-INF/{AL2.0,LGPL2.1}"
+            excludes += "META-INF/AL2.0"
+            excludes += "META-INF/LGPL2.1"
         }
     }
     testOptions {
@@ -77,6 +79,21 @@ dependencies {
     implementation(libs.material)
     implementation(libs.mediapipe.tasks.audio)
     implementation(libs.androidx.lifecycle.service)
+    implementation(libs.kotlinx.coroutines.play.services)
+
+    // Room
+    implementation(libs.androidx.room.runtime)
+    implementation(libs.androidx.room.ktx)
+    ksp(libs.androidx.room.compiler)
+
+    // Location & Geofencing
+    implementation(libs.play.services.location)
+
+    // Wearable Data Layer
+    implementation(libs.play.services.wearable)
+
+    // Health Connect
+    implementation(libs.androidx.health.connect)
 
     // Firebase
     implementation(platform(libs.firebase.bom))
@@ -91,7 +108,7 @@ dependencies {
     implementation(libs.androidx.material3)
     implementation(libs.androidx.material.icons.extended)
     implementation(libs.androidx.activity.compose)
-    
+
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.leakcanary.android)
 

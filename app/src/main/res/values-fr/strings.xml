@@ -31,4 +31,9 @@
     <string name="masking_mode_title">Mode de Masquage</string>
     <string name="timer_title">Minuteur de Focus</string>
     <string name="off">Désactivé</string>
+    <string name="binaural_title">Sons Binauraux</string>
+    <string name="dnd_title">Auto-DND</string>
+    <string name="geofencing_title">Géo-repérage (Auto-Focus)</string>
+    <string name="stats_btn">Voir l\'historique</string>
+    <string name="streak_count">Série de focus : %1$d jours !</string>
 </resources>

@@ -31,4 +31,12 @@
     <string name="masking_mode_title">Masking Mode</string>
     <string name="timer_title">Focus Timer</string>
     <string name="off">Off</string>
+    <string name="binaural_title">Binaural Beats</string>
+    <string name="dnd_title">Auto-DND</string>
+    <string name="geofencing_title">Geofence (Auto-Focus)</string>
+    <string name="stats_btn">View History</string>
+    <string name="streak_count">Focus Streak: %1$d days!</string>
+    <string name="health_connect_linked">Health Connect linked</string>
+    <string name="heart_rate_display">❤️ %1$d BPM</string>
 </resources>
+<!-- Trigger rebuild -->

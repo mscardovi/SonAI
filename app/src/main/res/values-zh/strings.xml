@@ -31,4 +31,11 @@
     <string name="masking_mode_title">掩蔽模式</string>
     <string name="timer_title">专注计时器</string>
     <string name="off">关闭</string>
+    <string name="binaural_title">双声道拍频</string>
+    <string name="dnd_title">自动勿扰</string>
+    <string name="geofencing_title">地理围栏 (自动专注)</string>
+    <string name="stats_btn">查看历史</string>
+    <string name="streak_count">专注连续: %1$d 天！</string>
+    <string name="health_connect_linked">Health Connect 已连接</string>
+    <string name="heart_rate_display">❤️ %1$d BPM</string>
 </resources>

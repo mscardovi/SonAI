@@ -31,4 +31,11 @@
     <string name="masking_mode_title">マスキングモード</string>
     <string name="timer_title">フォーカスタイマー</string>
     <string name="off">オフ</string>
+    <string name="binaural_title">バイノーラルビート</string>
+    <string name="dnd_title">自動DND</string>
+    <string name="geofencing_title">ジオフェンス (自動フォーカス)</string>
+    <string name="stats_btn">履歴を表示</string>
+    <string name="streak_count">フォーカス継続: %1$d 日！</string>
+    <string name="health_connect_linked">Health Connect 連携済み</string>
+    <string name="heart_rate_display">❤️ %1$d BPM</string>
 </resources>

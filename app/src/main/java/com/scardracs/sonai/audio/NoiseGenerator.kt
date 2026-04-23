@@ -35,6 +35,10 @@ class NoiseGenerator {
     private var targetMasterVolume = 0.5f
     private val activeVolumes = NoiseType.entries.associateWith { 0f }.toMutableMap()
     private val targetVolumes = NoiseType.entries.associateWith { 0f }.toMutableMap()
+
+    private var binauralType = BinauralType.OFF
+    private var binauralVolume = 0f
+    private var targetBinauralVolume = 0f
     
     private val lock = ReentrantLock()
 
@@ -44,6 +48,25 @@ class NoiseGenerator {
         EARTH_RUMBLE(R.string.mode_brown),
         RAIN_FOREST(R.string.mode_rain),
         OCEAN_WAVES(R.string.mode_ocean)
+    }
+
+    enum class BinauralType(val baseFreq: Float, val beatFreq: Float) {
+        OFF(0f, 0f),
+        ALPHA(150f, 10f), // Focus, calm
+        BETA(150f, 20f),  // High focus, alertness
+        THETA(150f, 6f),  // Relaxation, creativity
+        DELTA(150f, 2.5f) // Deep sleep, healing
+    }
+
+    fun setBinauralBeat(type: BinauralType, volume: Float) {
+        lock.withLock {
+            binauralType = type
+            targetBinauralVolume = volume.coerceIn(0f, 1f)
+            if (!isPlaying && targetBinauralVolume > 0f) {
+                isPlaying = true
+                startThread()
+            }
+        }
     }
 
     fun setMasterVolume(volume: Float) {
@@ -84,7 +107,7 @@ class NoiseGenerator {
     private fun runGenerationLoop() {
         Log.i(TAG, "Audio generation thread started")
         val bufferSize = AudioTrack.getMinBufferSize(
-            SAMPLE_RATE, AudioFormat.CHANNEL_OUT_MONO, AudioFormat.ENCODING_PCM_16BIT
+            SAMPLE_RATE, AudioFormat.CHANNEL_OUT_STEREO, AudioFormat.ENCODING_PCM_16BIT
         )
 
         val track = try {
@@ -98,22 +121,38 @@ class NoiseGenerator {
         lock.withLock { audioTrack = track }
         track.play()
 
-        val samples = ShortArray(bufferSize / 2)
+        val samples = ShortArray(bufferSize / 2) // ShortArray size for Stereo (L+R shorts)
         val state = GeneratorState()
 
         while (true) {
             val localIsPlaying = lock.withLock { isPlaying }
 
-            if (!localIsPlaying && activeVolumes.values.all { it <= 0.001f }) break
+            if (!localIsPlaying && activeVolumes.values.all { it <= 0.001f } && binauralVolume <= 0.001f) break
 
-            for (i in samples.indices) {
+            for (i in 0 until samples.size step 2) {
                 updateVolumes()
                 state.updatePhases()
                 val rawWhite = Random.nextFloat() * 2 - 1
                 
                 val mixed = generateMix(rawWhite, state)
-                val finalOut = (mixed.coerceIn(-1.5f, 1.5f) / 1.5f).coerceIn(-1f, 1f) * MAX_TOTAL_VOLUME * masterVolume
-                samples[i] = (finalOut * Short.MAX_VALUE).toInt().toShort()
+                
+                // Binaural logic
+                var leftBinaural = 0f
+                var rightBinaural = 0f
+                if (binauralType != BinauralType.OFF && binauralVolume > 0f) {
+                    val freqL = binauralType.baseFreq
+                    val freqR = binauralType.baseFreq + binauralType.beatFreq
+                    state.binauralPhaseL = (state.binauralPhaseL + (freqL * TWO_PI / SAMPLE_RATE)) % TWO_PI
+                    state.binauralPhaseR = (state.binauralPhaseR + (freqR * TWO_PI / SAMPLE_RATE)) % TWO_PI
+                    leftBinaural = sin(state.binauralPhaseL.toDouble()).toFloat() * binauralVolume * 0.3f
+                    rightBinaural = sin(state.binauralPhaseR.toDouble()).toFloat() * binauralVolume * 0.3f
+                }
+
+                val finalOutL = ((mixed + leftBinaural).coerceIn(-1.5f, 1.5f) / 1.5f).coerceIn(-1f, 1f) * MAX_TOTAL_VOLUME * masterVolume
+                val finalOutR = ((mixed + rightBinaural).coerceIn(-1.5f, 1.5f) / 1.5f).coerceIn(-1f, 1f) * MAX_TOTAL_VOLUME * masterVolume
+                
+                samples[i] = (finalOutL * Short.MAX_VALUE).toInt().toShort()
+                samples[i + 1] = (finalOutR * Short.MAX_VALUE).toInt().toShort()
             }
             track.write(samples, 0, samples.size)
         }
@@ -133,7 +172,7 @@ class NoiseGenerator {
             .setAudioFormat(AudioFormat.Builder()
                 .setEncoding(AudioFormat.ENCODING_PCM_16BIT)
                 .setSampleRate(SAMPLE_RATE)
-                .setChannelMask(AudioFormat.CHANNEL_OUT_MONO).build())
+                .setChannelMask(AudioFormat.CHANNEL_OUT_STEREO).build())
             .setBufferSizeInBytes(bufferSize)
             .setTransferMode(AudioTrack.MODE_STREAM).build()
     }
@@ -153,6 +192,11 @@ class NoiseGenerator {
                 else (current - VOL_FADE_SPEED).coerceAtLeast(target)
             }
         }
+
+        if (binauralVolume != targetBinauralVolume) {
+            binauralVolume = if (targetBinauralVolume > binauralVolume) (binauralVolume + VOL_FADE_SPEED).coerceAtMost(targetBinauralVolume)
+            else (binauralVolume - VOL_FADE_SPEED).coerceAtLeast(targetBinauralVolume)
+        }
     }
 
     private class GeneratorState {
@@ -166,6 +210,7 @@ class NoiseGenerator {
         var windLP1 = 0f; var windLP2 = 0f
         var thunderLevel = 0f; var earthquakeLevel = 0f
         var seaGullLevel = 0f; var forestBirdLevel = 0f
+        var binauralPhaseL = 0f; var binauralPhaseR = 0f
         var sampleCount = 0
         var nextThunderSample = (SAMPLE_RATE * 15 + Random.nextInt(SAMPLE_RATE * 30))
         var nextEarthquakeSample = (SAMPLE_RATE * 10 + Random.nextInt(SAMPLE_RATE * 30))
