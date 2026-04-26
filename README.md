@@ -50,9 +50,9 @@ generate natural, organic counter-noises that evolve with your surroundings to p
 
 ## 📱 Screenshots
 
-|                     Light Mode                     |                     Dark Mode                     |                   Wear OS Tile                    |
-|:--------------------------------------------------:|:-------------------------------------------------:|:-------------------------------------------------:|
-| <img src="screenshots/light_mode.png" width="240"> | <img src="screenshots/dark_mode.png" width="240"> | <img src="screenshots/wear_tile.png" width="240"> |
+|                     Light Mode                     |                     Dark Mode                     |
+|:--------------------------------------------------:|:-------------------------------------------------:|
+| <img src="screenshots/light_mode.png" width="240"> | <img src="screenshots/dark_mode.png" width="240"> |
 
 ## 🛠 Tech Stack
 
