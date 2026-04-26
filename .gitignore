@@ -8,6 +8,7 @@
 /build
 /captures
 /wear/build/
+/wear/release/
 .externalNativeBuild
 .cxx
 local.properties
