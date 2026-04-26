@@ -52,6 +52,15 @@ generate natural, organic counter-noises that evolve with your surroundings to p
   selected. No audio data is ever recorded, stored, or transmitted. See
   our [Privacy Policy](PRIVACY.md).
 
+## 🆕 What's New in v1.1.0
+
+- **Stochastic Audio Engine**: Completely redesigned procedural synthesis with Triple-LFO interaction, stochastic drift, and turbulence modulation for deep, non-repetitive organic soundscapes.
+- **High-Fidelity Audio**: Migrated to **Stereo 48kHz 32-bit Float** PCM for studio-grade clarity and dynamic range.
+- **Improved Ocean Realism**: New liquid "sloshing" physics and foaming turbulence for the most realistic waves yet.
+- **Deep Randomization**: All masking modes now feature periodic drift and stochastic variations.
+- **License Update**: Project transitioned to the **Apache License 2.0**.
+- **Performance**: Optimized audio generation thread for lower latency and better power efficiency.
+
 ## 📱 Screenshots
 
 |                     Light Mode                     |                     Dark Mode                     |
