@@ -14,9 +14,10 @@ generate natural, organic counter-noises that evolve with your surroundings to p
 - **Smart Adaptive Volume**: Automatically adjusts masking intensity based on ambient decibel
   levels. On Wear OS, it can also use **Heart Rate Biofeedback** to boost masking during detected
   stress spikes.
-- **Organic Audio Engine**: A custom procedural synthesis engine using low-level `AudioTrack`.
-  Features multi-layered LFO modulation and EMA-smoothed transitions for a non-fatiguing experience.
-  Now with **Stereo 44.1kHz** support.
+- **Stochastic Audio Engine**: A custom procedural synthesis engine using low-level `AudioTrack`.
+  Features **Triple-LFO interaction**, **Stochastic Drift**, and **Turbulence Modulation** for an
+  infinite, non-repeating, and deeply organic experience.
+  Now with **High-Fidelity Stereo 48kHz Float** support.
 - **Binaural Beats Selection**: Overlay Alpha, Beta, Theta, or Delta waves to target specific mental
   states like deep focus, creativity, or relaxation.
 - **Automation & Routines**:
@@ -24,12 +25,15 @@ generate natural, organic counter-noises that evolve with your surroundings to p
       eliminate digital interruptions.
     - **Geofencing**: Automatic notifications or session suggestions when entering pre-defined "
       Focus Zones" (e.g., office or library).
-- **Atmospheric Modes**:
-    - **Deep Space**: Mechanical, dark engine hum for deep concentration.
-    - **Stellar Wind**: Organic, breathy wind gusts using resonant pink noise filtering.
-    - **Earth Rumble**: Subsonic tectonic rumbles, tremors, and distant storms.
-    - **Rain Forest**: Dynamic rain with procedural bird chirps and distant thunder.
-    - **Ocean Waves**: Slow waves with realistic, synthesized coastal seagull calls.
+- **Atmospheric Modes (Generative)**:
+    - **Deep Space**: Mechanical, dark engine hum with ultra-slow structural resonance drift.
+    - **Stellar Wind**: Organic, breathy wind gusts with stochastic pressure fluctuations.
+    - **Earth Rumble**: Subsonic tectonic rumbles, tremors, and distant storms with tectonic stress
+      randomization.
+    - **Rain Forest**: Dynamic rain with procedural bird chirps, foliage filtering, and rainfall
+      density drift.
+    - **Ocean Waves**: Deep surge and liquid "sloshing" with prime-relative swell interaction and
+      foaming turbulence.
     - **Hybrid Auto**: A smart mix that dynamically balances all modes based on environmental needs.
 - **Animated Focus Timer**: Integrated countdown timer (15–120 min). The interactive UI slider *
   *moves automatically** as time passes, providing real-time visual progress of your session.
@@ -63,8 +67,8 @@ generate natural, organic counter-noises that evolve with your surroundings to p
 - **Location**: Play Services Geofencing for location-based automation.
 - **Health**: Health Services for real-time heart rate biofeedback on Wear OS and **Health Connect**
   for historical health data integration.
-- **Audio Engine**: Procedural synthesis via `AudioTrack` (Stereo PCM 16-bit, 44.1kHz)
-- **Minimum SDK**: 30 (Android 11)
+- **Audio Engine**: Procedural synthesis via `AudioTrack` (Stereo PCM 32-bit Float, 48kHz)
+- **Minimum SDK**: 34 (Android 14)
 - **Target SDK**: 37 (Android 17)
 - **Build System**: Gradle 9.2.0 (Kotlin DSL)
 - **KSP**: 2.3.7 (Optimized for Kotlin 2.3.x)
@@ -113,7 +117,7 @@ generate natural, organic counter-noises that evolve with your surroundings to p
 
 ## 📜 License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the Apache License 2.0 - see the [LICENSE.md](LICENSE.md) file for details.
 
 ---
-*Created with focus by the SonAI Team.*
+*Created with focus by the SonAI team.*
